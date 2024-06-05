@@ -22,31 +22,30 @@ function noop(): void {
   // do nothing
 }
 
-export interface Customer {
+export interface Property {
   id: string;
   avatar: string;
-  name: string;
-  email: string;
   address: { city: string; state: string; country: string; street: string };
-  phone: string;
+  status: string;
+  tennant: string;
   createdAt: Date;
 }
 
-interface CustomersTableProps {
+interface PropertiesTableProps {
   count?: number;
   page?: number;
-  rows?: Customer[];
+  rows?: Property[];
   rowsPerPage?: number;
 }
 
-export function CustomersTable({
+export function PropertiesTable({
   count = 0,
   rows = [],
   page = 0,
   rowsPerPage = 0,
-}: CustomersTableProps): React.JSX.Element {
+}: PropertiesTableProps): React.JSX.Element {
   const rowIds = React.useMemo(() => {
-    return rows.map((customer) => customer.id);
+    return rows.map((property) => property.id);
   }, [rows]);
 
   const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
@@ -101,15 +100,17 @@ export function CustomersTable({
                   <TableCell>
                     <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
                       <Avatar src={row.avatar} />
-                      <Typography variant="subtitle2">{row.name}</Typography>
+                      <Typography variant="subtitle2">{row.tennant}</Typography>
                     </Stack>
                   </TableCell>
-                  <TableCell>{row.email}</TableCell>
+                  <TableCell>{row.status}</TableCell>
+
+                  {/*<TableCell>{row.email}</TableCell>
                   <TableCell>
                     {row.address.city}, {row.address.state}, {row.address.country}
                   </TableCell>
                   <TableCell>{row.phone}</TableCell>
-                  <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>
+                  <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>*/}
                 </TableRow>
               );
             })}

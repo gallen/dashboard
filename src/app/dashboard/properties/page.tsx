@@ -1,20 +1,23 @@
+'use client';
+
 import * as React from 'react';
-import type { Metadata } from 'next';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Download as DownloadIcon } from '@phosphor-icons/react/dist/ssr/Download';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { Upload as UploadIcon } from '@phosphor-icons/react/dist/ssr/Upload';
-import dayjs from 'dayjs';
 
-import { config } from '@/config';
-import { CustomersFilters } from '@/components/dashboard/customer/customers-filters';
-import { CustomersTable } from '@/components/dashboard/customer/customers-table';
-import type { Customer } from '@/components/dashboard/customer/customers-table';
+import { PropertiesFilters } from '@/components/dashboard/properties/properties-filters';
+import { PropertiesTable } from '@/components/dashboard/properties/properties-table';
+import type { Property } from '@/components/dashboard/properties/properties-table';
 
-export const metadata = { title: `Customers | Dashboard | ${config.site.name}` } satisfies Metadata;
+import { doc, setDoc, collection, getDocs } from "firebase/firestore";
+import { dbHandle } from '@/components/firebase'
+import { useRouter } from 'next/navigation'
 
+//export const metadata = { title: `Customers | Dashboard | ${config.site.name}` } satisfies Metadata;
+/*
 const customers = [
   {
     id: 'USR-010',
@@ -107,45 +110,70 @@ const customers = [
     address: { city: 'San Diego', country: 'USA', state: 'California', street: '75247' },
     createdAt: dayjs().subtract(2, 'hours').toDate(),
   },
-] satisfies Customer[];
+] satisfies Customer[];*/
 
 export default function Page(): React.JSX.Element {
   const page = 0;
   const rowsPerPage = 5;
 
+  const [customers, setCustomers] = React.useState<Property[]>([]);
+  const router = useRouter();
+
+  ImportCustomers().then((customers) => setCustomers(customers));
   const paginatedCustomers = applyPagination(customers, page, rowsPerPage);
 
   return (
     <Stack spacing={3}>
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
-          <Typography variant="h4">Customers</Typography>
+          <Typography variant="h4">Properties</Typography>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <Button color="inherit" startIcon={<UploadIcon fontSize="var(--icon-fontSize-md)" />}>
               Import
             </Button>
-            <Button color="inherit" startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />}>
+            <Button color="inherit" startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />}
+            onClick = {() => handleExport(paginatedCustomers)}>
               Export
             </Button>
           </Stack>
         </Stack>
         <div>
-          <Button startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
+          <Button startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained"
+          onClick = {() => router.push('./properties/register')}>
             Add
           </Button>
         </div>
       </Stack>
-      <CustomersFilters />
-      <CustomersTable
-        count={paginatedCustomers.length}
-        page={page}
-        rows={paginatedCustomers}
-        rowsPerPage={rowsPerPage}
-      />
+      <PropertiesFilters />
+
+      {customers.length != 0 && 
+        <PropertiesTable
+          count={paginatedCustomers.length}
+          page={page}
+          rows={paginatedCustomers}
+          rowsPerPage={rowsPerPage}
+        />
+      }
     </Stack>
   );
 }
 
-function applyPagination(rows: Customer[], page: number, rowsPerPage: number): Customer[] {
+function applyPagination(rows: Property[], page: number, rowsPerPage: number): Property[] {
   return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+}
+
+async function ImportCustomers(){
+  const querySnapshot = await getDocs(collection(dbHandle, "Properties"));
+  let customers = new Array<Property>();
+  querySnapshot.forEach((doc) => {
+    customers.push(doc.data() as Property);
+  });
+  return customers;
+}
+
+async function handleExport(customers: Property[]){
+  customers.forEach(async (customer) => {
+      var docRef = doc(dbHandle, "Properties", customer.id);
+      await setDoc(docRef, customer);
+  });
 }
