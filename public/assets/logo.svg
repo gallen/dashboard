@@ -1,0 +1,22 @@
+<svg width="200" height="100" viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">
+  <!-- Transparent Background -->
+  <rect width="200" height="130" fill="none"/>
+
+  <!-- House Body -->
+  <path d="M30 70 L30 30 L100 10 L170 30 L170 70 Z" fill="#ffffff" stroke="#0056b3" stroke-width="2"/>
+
+  <!-- Roof -->
+  <polygon points="30,30 100,10 170,30" fill="#007bff" stroke="#0056b3" stroke-width="2"/>
+
+  <!-- Door -->
+  <rect x="95" y="50" width="20" height="30" fill="#543729" stroke="#2e1f17" stroke-width="2"/>
+
+  <!-- Windows -->
+  <rect x="50" y="50" width="25" height="20" fill="#87ceeb" stroke="#0056b3" stroke-width="2"/>
+  <rect x="125" y="50" width="25" height="20" fill="#87ceeb" stroke="#0056b3" stroke-width="2"/>
+
+  <!-- Text -->
+  <text x="100" y="120" font-family="Arial, sans-serif" font-size="48" fill="white" text-anchor="middle">
+    My Real Estate
+  </text>
+</svg>
