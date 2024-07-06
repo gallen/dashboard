@@ -24,25 +24,26 @@ function noop(): void {
 
 export interface Property {
   id: string;
-  avatar: string;
+  picture: string;
   address: { city: string; state: string; country: string; street: string };
-  status: string;
-  tennant: string;
-  createdAt: Date;
+  BuyTime: Date;
+  BuyPrice: string;
+  SellTime: Date;
+  SellPrice: string;
+  externalIds: { zillow: string; redin: string };
 }
 
 interface PropertiesTableProps {
   count?: number;
-  page?: number;
+  page?: { state: number; update: React.Dispatch<React.SetStateAction<number>>};
   rows?: Property[];
-  rowsPerPage?: number;
+  rowsPerPage?: { state: number; update: React.Dispatch<React.SetStateAction<number>>};
 }
+
 
 export function PropertiesTable({
   count = 0,
   rows = [],
-  page = 0,
-  rowsPerPage = 0,
 }: PropertiesTableProps): React.JSX.Element {
   const rowIds = React.useMemo(() => {
     return rows.map((property) => property.id);
@@ -52,6 +53,10 @@ export function PropertiesTable({
 
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
+
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPage] = React.useState(5);
+  const paginatedProperties = applyPagination(rows, page, rowsPerPage);
 
   return (
     <Card>
@@ -72,15 +77,16 @@ export function PropertiesTable({
                   }}
                 />
               </TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Location</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Signed Up</TableCell>
+              <TableCell>Property</TableCell>
+              <TableCell>Address</TableCell>
+              <TableCell>BuyTime</TableCell>
+              <TableCell>BuyPrice</TableCell>
+              <TableCell>SellTime</TableCell>
+              <TableCell>SellPrice</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => {
+            {paginatedProperties.map((row) => {
               const isSelected = selected?.has(row.id);
 
               return (
@@ -99,18 +105,16 @@ export function PropertiesTable({
                   </TableCell>
                   <TableCell>
                     <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
-                      <Avatar src={row.avatar} />
-                      <Typography variant="subtitle2">{row.tennant}</Typography>
+                      <Avatar src={row.picture} />
                     </Stack>
                   </TableCell>
-                  <TableCell>{row.status}</TableCell>
-
-                  {/*<TableCell>{row.email}</TableCell>
                   <TableCell>
                     {row.address.city}, {row.address.state}, {row.address.country}
                   </TableCell>
-                  <TableCell>{row.phone}</TableCell>
-                  <TableCell>{dayjs(row.createdAt).format('MMM D, YYYY')}</TableCell>*/}
+                  <TableCell>{dayjs(row.BuyTime).format('MMM D, YYYY')}</TableCell>
+                  <TableCell>{row.BuyPrice}</TableCell>
+                  <TableCell>{dayjs(row.SellTime).format('MMM D, YYYY')}</TableCell>
+                  <TableCell>{row.SellPrice}</TableCell>
                 </TableRow>
               );
             })}
@@ -121,8 +125,8 @@ export function PropertiesTable({
       <TablePagination
         component="div"
         count={count}
-        onPageChange={noop}
-        onRowsPerPageChange={noop}
+        onPageChange={(event, number) => setPage(number)}
+        onRowsPerPageChange={(element) => setRowsPage(parseInt(element.target.value))}
         page={page}
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
@@ -130,3 +134,8 @@ export function PropertiesTable({
     </Card>
   );
 }
+
+function applyPagination(rows: Property[], page: number, rowsPerPage: number): Property[] {
+  return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+}
+
