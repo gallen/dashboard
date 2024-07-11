@@ -13,17 +13,22 @@ import { PropertiesFilters } from '@/components/dashboard/properties/properties-
 import { PropertiesTable } from '@/components/dashboard/properties/properties-table';
 import type { Property } from '@/components/dashboard/properties/properties-table';
 
-import { doc, setDoc, collection, getDocs } from "firebase/firestore";
+import { doc, setDoc, collection, getDocs, deleteDoc } from "firebase/firestore";
 import { dbHandle } from '@/components/firebase'
 import { useRouter } from 'next/navigation'
 import dayjs from 'dayjs';
+
+import { getDownloadURL, ref, deleteObject } from 'firebase/storage';
+import { storageHandle } from '@/components/firebase';
+import { boolean } from 'zod';
 
 //export const metadata = { title: `Customers | Dashboard | ${config.site.name}` } satisfies Metadata;
 
 const customers = [
   {
     id: 'USR-010',
-    picture: '/assets/avatar-10.png',
+    picture: 'avatar-10.png',
+    pictureHandle: '',
     address: { city: 'Madrid', country: 'Spain', state: 'Comunidad de Madrid', street: '4158 Hedge Street' },
     BuyTime: dayjs().subtract(2, 'hours').toDate(),
     BuyPrice: '€ 1,200,000',
@@ -33,7 +38,8 @@ const customers = [
   },
   {
     id: 'USR-009',
-    picture: '/assets/avatar-9.png',
+    picture: 'avatar-9.png',
+    pictureHandle: '',
     address: { city: 'Carson City', country: 'USA', state: 'Nevada', street: '2188 Armbrester Drive' },
     BuyTime: dayjs().subtract(2, 'hours').toDate(),
     BuyPrice: '€ 1,200,000',
@@ -43,7 +49,8 @@ const customers = [
   },
   {
     id: 'USR-008',
-    picture: '/assets/avatar-8.png',
+    picture: 'avatar-8.png',
+    pictureHandle: '',
     address: { city: 'North Canton', country: 'USA', state: 'Ohio', street: '4894 Lakeland Park Drive' },
     BuyTime: dayjs().subtract(2, 'hours').toDate(),
     BuyPrice: '€ 1,200,000',
@@ -53,7 +60,8 @@ const customers = [
   },
   {
     id: 'USR-007',
-    picture: '/assets/avatar-7.png',
+    picture: 'avatar-7.png',
+    pictureHandle: '',
     address: { city: 'Salt Lake City', country: 'USA', state: 'Utah', street: '368 Lamberts Branch Road' },
     BuyTime: dayjs().subtract(2, 'hours').toDate(),
     BuyPrice: '€ 1,200,000',
@@ -63,7 +71,8 @@ const customers = [
   },
   {
     id: 'USR-006',
-    picture: '/assets/avatar-6.png',
+    picture: 'avatar-6.png',
+    pictureHandle: '',
     address: { city: 'Murray', country: 'USA', state: 'Utah', street: '3934 Wildrose Lane' },
     BuyTime: dayjs().subtract(2, 'hours').toDate(),
     BuyPrice: '€ 1,200,000',
@@ -73,7 +82,8 @@ const customers = [
   },
   {
     id: 'USR-005',
-    picture: '/assets/avatar-5.png',
+    picture: 'avatar-5.png',
+    pictureHandle: '',
     address: { city: 'Atlanta', country: 'USA', state: 'Georgia', street: '1865 Pleasant Hill Road' },
     BuyTime: dayjs().subtract(2, 'hours').toDate(),
     BuyPrice: '€ 1,200,000',
@@ -84,7 +94,8 @@ const customers = [
 
   {
     id: 'USR-004',
-    picture: '/assets/avatar-4.png',
+    picture: 'avatar-4.png',
+    pictureHandle: '',
     address: { city: 'Berkeley', country: 'USA', state: 'California', street: '317 Angus Road' },
     BuyTime: dayjs().subtract(2, 'hours').toDate(),
     BuyPrice: '€ 1,200,000',
@@ -94,7 +105,8 @@ const customers = [
   },
   {
     id: 'USR-003',
-    picture: '/assets/avatar-3.png',
+    picture: 'avatar-3.png',
+    pictureHandle: '',
     address: { city: 'Cleveland', country: 'USA', state: 'Ohio', street: '2849 Fulton Street' },
     BuyTime: dayjs().subtract(2, 'hours').toDate(),
     BuyPrice: '€ 1,200,000',
@@ -104,7 +116,8 @@ const customers = [
   },
   {
     id: 'USR-002',
-    picture: '/assets/avatar-2.png',
+    picture: 'avatar-2.png',
+    pictureHandle: '', 
     address: { city: 'Los Angeles', country: 'USA', state: 'California', street: '1798 Hickory Ridge Drive' },
     BuyTime: dayjs().subtract(2, 'hours').toDate(),
     BuyPrice: '€ 1,200,000',
@@ -114,7 +127,8 @@ const customers = [
   },
   {
     id: 'USR-001',
-    picture: '/assets/avatar-1.png',
+    picture: 'avatar-1.png',
+    pictureHandle: '',
     address: { city: 'San Diego', country: 'USA', state: 'California', street: '75247' },
     BuyTime: dayjs().subtract(2, 'hours').toDate(),
     BuyPrice: '€ 1,200,000',
@@ -126,12 +140,52 @@ const customers = [
 
 export default function Page(): React.JSX.Element {
 
-  const [properties, setCustomers] = React.useState<Property[]>([]);
+  const [properties, setProperties] = React.useState<Property[]>([]);
   const router = useRouter();
 
   useEffect(() => {
-    ImportCustomers().then((properties) => setCustomers(properties));
+    ImportProperties().then((properties) => setProperties(properties));
   }, []);
+
+  async function DeleteProperties(propertyIds: Set<string>){
+    let newProperties = new Array<Property>(); console.log("here");
+    let promises = properties.map(async (property) => {
+      if(!propertyIds.has(property.id)){
+        newProperties.push(property);
+        return;
+      }
+
+      await deleteDoc(doc(dbHandle, "Properties", property.id));
+      const storageRef = ref(storageHandle, 'Properties/' + property.picture);
+      await deleteObject(storageRef);
+    });
+    await Promise.all(promises);
+
+    setProperties(newProperties);
+  }
+
+  function IsMatch(pObj: object, filter: string){
+    let isMatch = false;
+    Object.entries(pObj).forEach(([key, value]: [string, any]) => {
+      if(typeof value == 'string' && value.toLowerCase().includes(filter.toLowerCase()))
+        isMatch ||= true;
+      else if (typeof value == 'object')
+        isMatch ||= IsMatch(value, filter);
+    });
+    return isMatch;
+  }
+
+  function FilterProperties(filter: string){
+    let newProperties = new Array<Property>();
+    let oldProperties = new Array<Property>();
+    properties.forEach((property) => {
+      if(IsMatch(property, filter)) newProperties.push(property);
+      else oldProperties.push(property);
+    });
+    newProperties.push(...oldProperties);
+
+    setProperties(newProperties);
+  }
 
   return (
     <Stack spacing={3}>
@@ -155,25 +209,32 @@ export default function Page(): React.JSX.Element {
           </Button>
         </div>
       </Stack>
-      <PropertiesFilters />
+      <PropertiesFilters 
+        onSearch = {FilterProperties}
+      />
 
       {customers.length != 0 && 
         <PropertiesTable
           count={properties.length}
           rows={properties}
+          onDelete={DeleteProperties}
         />
       }
     </Stack>
   );
 }
 
-async function ImportCustomers(){
+async function ImportProperties(){
   const querySnapshot = await getDocs(collection(dbHandle, "Properties"));
-  let customers = new Array<Property>();
-  querySnapshot.forEach((doc) => {
-    customers.push(doc.data() as Property);
+  let properties = new Array<Property>();
+  const promises = querySnapshot.docs.map(async (doc) => {
+    let property = doc.data() as Property;
+
+    property.pictureHandle = await getDownloadURL(ref(storageHandle, 'Properties/' + property.picture));
+    properties.push(property);
   }); 
-  return customers;
+  await Promise.all(promises);
+  return properties;
 }
 
 async function handleExport(properties: Property[]){

@@ -4,7 +4,17 @@ import InputAdornment from '@mui/material/InputAdornment';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
 
-export function PropertiesFilters(): React.JSX.Element {
+function noop(): void {
+  // do nothing
+}
+
+interface PropertiesFilterProps {
+  onSearch?: (filter: string) => void;
+}
+
+export function PropertiesFilters(
+  { onSearch = noop }: PropertiesFilterProps
+): React.ReactElement {
   return (
     <Card sx={{ p: 2 }}>
       <OutlinedInput
@@ -17,6 +27,7 @@ export function PropertiesFilters(): React.JSX.Element {
           </InputAdornment>
         }
         sx={{ maxWidth: '500px' }}
+        onChange={(e) => onSearch(e.target.value)}
       />
     </Card>
   );

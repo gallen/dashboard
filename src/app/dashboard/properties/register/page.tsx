@@ -10,8 +10,10 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation'
 import type { Property } from '@/components/dashboard/properties/properties-table';
 
-import { doc, setDoc, collection, getDocs } from "firebase/firestore";
-import { dbHandle } from '@/components/firebase'
+import { doc, setDoc } from "firebase/firestore";
+import { ref } from 'firebase/storage';
+import { dbHandle, storageHandle } from '@/components/firebase'
+import { uploadBytes } from 'firebase/storage';
 
 export default function Page(): React.JSX.Element {
     const [file, setFile] = React.useState<File | null>(null);
@@ -28,17 +30,20 @@ export default function Page(): React.JSX.Element {
     const sellPrice = React.useRef('');
 
     const router = useRouter();
-
+    var fileUrl = '';
     const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>): void => {
         if (e.target.files && e.target.files.length > 0) {
             setFile(e.target.files[0]);
+            fileUrl = URL.createObjectURL(e.target.files[0]);
         }
     }; 
 
     async function handleExport(){
+        if(file == null) return;
+        let propertyId = Math.random().toString(36).substring(7);
         var newProperty = {
-            id: Math.random().toString(36).substring(7),
-            picture: '',
+            id: propertyId,
+            picture: propertyId + '.png',
             address: addressRef.current,
             BuyTime: buyTime.current,
             BuyPrice: buyPrice.current,
@@ -48,6 +53,10 @@ export default function Page(): React.JSX.Element {
 
         var docRef = doc(dbHandle, "Properties", newProperty.id);
         await setDoc(docRef, newProperty);
+
+        var storageRef = ref(storageHandle, 'Properties/' + newProperty.picture);
+        uploadBytes(storageRef, file as File);
+        router.push('../properties');
     }
 
     return (
@@ -75,22 +84,22 @@ export default function Page(): React.JSX.Element {
                 </label>
                 <Stack spacing={2} sx={{ flexGrow: 1 }} >
                         <Typography variant="h4">Address</Typography>
-                        <TextField id="filled-basic" label="Country" onChange={(e: React.ChangeEvent<HTMLInputElement>) => addressRef.current.country = e.target.value} />
+                        <TextField id="filled-basic" label="Street" onChange={(e: React.ChangeEvent<HTMLInputElement>) => addressRef.current.street = e.target.value} />
                         <TextField id="filled-basic" label="State" onChange={(e: React.ChangeEvent<HTMLInputElement>) => addressRef.current.state = e.target.value} />
                         <TextField id="filled-basic" label="City" onChange={(e: React.ChangeEvent<HTMLInputElement>) => addressRef.current.city = e.target.value} />
-                        <TextField id="filled-basic" label="Street" onChange={(e: React.ChangeEvent<HTMLInputElement>) => addressRef.current.street = e.target.value} />
+                        <TextField id="filled-basic" label="Country" onChange={(e: React.ChangeEvent<HTMLInputElement>) => addressRef.current.country = e.target.value} />
                 </Stack> 
             </Stack>
-            <Typography variant="h4">Transactions</Typography>
-            <TextField id = "filled-basic" label = "BuyTime (YY-MM-DD)" onChange={(e: React.ChangeEvent<HTMLInputElement>) => buyTime.current = new Date(e.target.value)}/>
+            <Typography variant="h4">Transactions</Typography> 
+            {/* Fix for UI here -> https://github.com/mui/material-ui/issues/8131 */}
+            <TextField id = "filled-basic" type = "date" InputLabelProps={{ shrink: true }} label="Buy Time" onChange={(e: React.ChangeEvent<HTMLInputElement>) => buyTime.current = new Date(e.target.value)}/>
             <TextField id = "filled-basic" label = "BuyPrice" onChange={(e: React.ChangeEvent<HTMLInputElement>) => buyPrice.current = e.target.value} />
-            <TextField id = "filled-basic" label = "SellTime (YY-MM-DD)" onChange={(e: React.ChangeEvent<HTMLInputElement>) => sellTime.current = new Date(e.target.value)} />
+            <TextField id = "filled-basic" type = "date" InputLabelProps={{ shrink: true }} label = "SellTime" onChange={(e: React.ChangeEvent<HTMLInputElement>) => sellTime.current = new Date(e.target.value)} />
             <TextField id = "filled-basic" label = "SellPrice" onChange={(e: React.ChangeEvent<HTMLInputElement>) => sellPrice.current = e.target.value} />
             <Box
                 alignSelf="flex-end" sx = {{
                     height: 350, 
                     width: 400,
-                    contentVisibility: file == null ? 'visible' : 'hidden',
                 }} textAlign = 'end'
             >
                 <Button variant = "outlined" color = 'error' onClick = {() => router.push('../properties')}> Cancel </Button>

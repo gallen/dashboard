@@ -14,6 +14,7 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import dayjs from 'dayjs';
 
 import { useSelection } from '@/hooks/use-selection';
@@ -25,6 +26,7 @@ function noop(): void {
 export interface Property {
   id: string;
   picture: string;
+  pictureHandle: string;
   address: { city: string; state: string; country: string; street: string };
   BuyTime: Date;
   BuyPrice: string;
@@ -38,19 +40,21 @@ interface PropertiesTableProps {
   page?: { state: number; update: React.Dispatch<React.SetStateAction<number>>};
   rows?: Property[];
   rowsPerPage?: { state: number; update: React.Dispatch<React.SetStateAction<number>>};
+  onDelete?: (properties: Set<string>) => void;
 }
 
 
 export function PropertiesTable({
   count = 0,
   rows = [],
+  onDelete = noop,
 }: PropertiesTableProps): React.JSX.Element {
   const rowIds = React.useMemo(() => {
     return rows.map((property) => property.id);
   }, [rows]);
 
   const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
-
+  const selectedAny = (selected?.size ?? 0) > 0;
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
 
@@ -77,12 +81,33 @@ export function PropertiesTable({
                   }}
                 />
               </TableCell>
+              { selectedAny ? 
+              <>
+              <TableCell>
+              <Typography variant="body2" color="textSecondary">
+                {selected?.size} selected
+              </Typography>
+              </TableCell>
+              <TableCell>
+              <Stack direction = "row" spacing={3}>
+                <Button variant="contained" onClick={() => onDelete(selected)}>
+                  Delete
+                </Button>
+                <Button variant="contained"> {/* To Be Implemented */}
+                  Select 
+                </Button>
+              </Stack>
+              </TableCell>
+              </>
+              : <>
               <TableCell>Property</TableCell>
               <TableCell>Address</TableCell>
               <TableCell>BuyTime</TableCell>
               <TableCell>BuyPrice</TableCell>
               <TableCell>SellTime</TableCell>
               <TableCell>SellPrice</TableCell>
+              </>
+              }
             </TableRow>
           </TableHead>
           <TableBody>
@@ -105,7 +130,7 @@ export function PropertiesTable({
                   </TableCell>
                   <TableCell>
                     <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
-                      <Avatar src={row.picture} />
+                      <Avatar src={row.pictureHandle} />
                     </Stack>
                   </TableCell>
                   <TableCell>
