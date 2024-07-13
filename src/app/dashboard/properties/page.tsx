@@ -9,18 +9,17 @@ import { Download as DownloadIcon } from '@phosphor-icons/react/dist/ssr/Downloa
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { Upload as UploadIcon } from '@phosphor-icons/react/dist/ssr/Upload';
 
-import { PropertiesFilters } from '@/components/dashboard/properties/properties-filters';
+import { TableFilters, ImportTable, ExportTable, DeleteElements, FilterTable } from '@/components/dashboard/table-filters';
 import { PropertiesTable } from '@/components/dashboard/properties/properties-table';
 import type { Property } from '@/components/dashboard/properties/properties-table';
 
-import { doc, setDoc, collection, getDocs, deleteDoc } from "firebase/firestore";
+import { doc, deleteDoc } from "firebase/firestore";
 import { dbHandle } from '@/components/firebase'
 import { useRouter } from 'next/navigation'
 import dayjs from 'dayjs';
 
 import { getDownloadURL, ref, deleteObject } from 'firebase/storage';
 import { storageHandle } from '@/components/firebase';
-import { boolean } from 'zod';
 
 //export const metadata = { title: `Customers | Dashboard | ${config.site.name}` } satisfies Metadata;
 
@@ -30,66 +29,66 @@ const customers = [
     picture: 'avatar-10.png',
     pictureHandle: '',
     address: { city: 'Madrid', country: 'Spain', state: 'Comunidad de Madrid', street: '4158 Hedge Street' },
-    BuyTime: dayjs().subtract(2, 'hours').toDate(),
+    BuyTime: dayjs().subtract(2, 'hours'),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours').toDate(),
+    SellTime: dayjs().subtract(2, 'hours'),
     SellPrice: '€ 1,500,000',
-    externalIds: { zillow: '123456', redin: '654321' },
+    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
   {
     id: 'USR-009',
     picture: 'avatar-9.png',
     pictureHandle: '',
     address: { city: 'Carson City', country: 'USA', state: 'Nevada', street: '2188 Armbrester Drive' },
-    BuyTime: dayjs().subtract(2, 'hours').toDate(),
+    BuyTime: dayjs().subtract(2, 'hours'),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours').toDate(),
+    SellTime: dayjs().subtract(2, 'hours'),
     SellPrice: '€ 1,500,000',
-    externalIds: { zillow: '123456', redin: '654321'},
+    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
   {
     id: 'USR-008',
     picture: 'avatar-8.png',
     pictureHandle: '',
     address: { city: 'North Canton', country: 'USA', state: 'Ohio', street: '4894 Lakeland Park Drive' },
-    BuyTime: dayjs().subtract(2, 'hours').toDate(),
+    BuyTime: dayjs().subtract(2, 'hours'),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours').toDate(),
+    SellTime: dayjs().subtract(2, 'hours'),
     SellPrice: '€ 1,500,000',
-    externalIds: { zillow : '123456', redin: '654321' },
+    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
   {
     id: 'USR-007',
     picture: 'avatar-7.png',
     pictureHandle: '',
     address: { city: 'Salt Lake City', country: 'USA', state: 'Utah', street: '368 Lamberts Branch Road' },
-    BuyTime: dayjs().subtract(2, 'hours').toDate(),
+    BuyTime: dayjs().subtract(2, 'hours'),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours').toDate(),
+    SellTime: dayjs().subtract(2, 'hours'),
     SellPrice: '€ 1,500,000',
-    externalIds: { zillow: '123456', redin: '654321'}
+    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
   {
     id: 'USR-006',
     picture: 'avatar-6.png',
     pictureHandle: '',
     address: { city: 'Murray', country: 'USA', state: 'Utah', street: '3934 Wildrose Lane' },
-    BuyTime: dayjs().subtract(2, 'hours').toDate(),
+    BuyTime: dayjs().subtract(2, 'hours'),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours').toDate(),
+    SellTime: dayjs().subtract(2, 'hours'),
     SellPrice: '€ 1,500,000',
-    externalIds: { zillow: '123456', redin: '654321'}
+    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
   {
     id: 'USR-005',
     picture: 'avatar-5.png',
     pictureHandle: '',
     address: { city: 'Atlanta', country: 'USA', state: 'Georgia', street: '1865 Pleasant Hill Road' },
-    BuyTime: dayjs().subtract(2, 'hours').toDate(),
+    BuyTime: dayjs().subtract(2, 'hours'),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours').toDate(),
+    SellTime: dayjs().subtract(2, 'hours'),
     SellPrice: '€ 1,500,000',
-    externalIds: { zillow: '123456', redin: '654321'}
+    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
 
   {
@@ -97,44 +96,44 @@ const customers = [
     picture: 'avatar-4.png',
     pictureHandle: '',
     address: { city: 'Berkeley', country: 'USA', state: 'California', street: '317 Angus Road' },
-    BuyTime: dayjs().subtract(2, 'hours').toDate(),
+    BuyTime: dayjs().subtract(2, 'hours'),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours').toDate(),
+    SellTime: dayjs().subtract(2, 'hours'),
     SellPrice: '€ 1,500,000',
-    externalIds: { zillow: '123456', redin: '654321'}
+    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
   {
     id: 'USR-003',
     picture: 'avatar-3.png',
     pictureHandle: '',
     address: { city: 'Cleveland', country: 'USA', state: 'Ohio', street: '2849 Fulton Street' },
-    BuyTime: dayjs().subtract(2, 'hours').toDate(),
+    BuyTime: dayjs().subtract(2, 'hours'),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours').toDate(),
+    SellTime: dayjs().subtract(2, 'hours'),
     SellPrice: '€ 1,500,000',
-    externalIds: { zillow: '123456', redin: '654321'}
+    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
   {
     id: 'USR-002',
     picture: 'avatar-2.png',
     pictureHandle: '', 
     address: { city: 'Los Angeles', country: 'USA', state: 'California', street: '1798 Hickory Ridge Drive' },
-    BuyTime: dayjs().subtract(2, 'hours').toDate(),
+    BuyTime: dayjs().subtract(2, 'hours'),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours').toDate(),
+    SellTime: dayjs().subtract(2, 'hours'),
     SellPrice: '€ 1,500,000',
-    externalIds: { zillow: '123456', redin: '654321'}
+    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
   {
     id: 'USR-001',
     picture: 'avatar-1.png',
     pictureHandle: '',
     address: { city: 'San Diego', country: 'USA', state: 'California', street: '75247' },
-    BuyTime: dayjs().subtract(2, 'hours').toDate(),
+    BuyTime: dayjs().subtract(2, 'hours'),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours').toDate(),
+    SellTime: dayjs().subtract(2, 'hours'),
     SellPrice: '€ 1,500,000',
-    externalIds: { zillow: '123456', redin: '654321'}
+    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
 ] satisfies Property[];
 
@@ -144,46 +143,27 @@ export default function Page(): React.JSX.Element {
   const router = useRouter();
 
   useEffect(() => {
-    ImportProperties().then((properties) => setProperties(properties));
+    ImportTable('Properties').then(async (properties : Property[]) => {
+      let promises = properties.map(async (property) => {
+        property.pictureHandle = await getDownloadURL(ref(storageHandle, 'Properties/' + property.picture));
+      })
+      await Promise.all(promises);
+      setProperties(properties as Property[]);
+    });
   }, []);
 
   async function DeleteProperties(propertyIds: Set<string>){
-    let newProperties = new Array<Property>(); console.log("here");
-    let promises = properties.map(async (property) => {
-      if(!propertyIds.has(property.id)){
-        newProperties.push(property);
-        return;
-      }
-
+    let newProperties = await DeleteElements(properties, (property: Property) => propertyIds.has(property.id), 
+      async (property: Property) => {
       await deleteDoc(doc(dbHandle, "Properties", property.id));
       const storageRef = ref(storageHandle, 'Properties/' + property.picture);
       await deleteObject(storageRef);
     });
-    await Promise.all(promises);
-
     setProperties(newProperties);
   }
 
-  function IsMatch(pObj: object, filter: string){
-    let isMatch = false;
-    Object.entries(pObj).forEach(([key, value]: [string, any]) => {
-      if(typeof value == 'string' && value.toLowerCase().includes(filter.toLowerCase()))
-        isMatch ||= true;
-      else if (typeof value == 'object')
-        isMatch ||= IsMatch(value, filter);
-    });
-    return isMatch;
-  }
-
   function FilterProperties(filter: string){
-    let newProperties = new Array<Property>();
-    let oldProperties = new Array<Property>();
-    properties.forEach((property) => {
-      if(IsMatch(property, filter)) newProperties.push(property);
-      else oldProperties.push(property);
-    });
-    newProperties.push(...oldProperties);
-
+    let newProperties = FilterTable(properties, filter);
     setProperties(newProperties);
   }
 
@@ -197,7 +177,7 @@ export default function Page(): React.JSX.Element {
               Import
             </Button>
             <Button color="inherit" startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />}
-            onClick = {() => handleExport(properties)}>
+            onClick = {() => ExportTable(customers, 'Properties', (element: Property) => element.id)}>
               Export
             </Button>
           </Stack>
@@ -209,8 +189,9 @@ export default function Page(): React.JSX.Element {
           </Button>
         </div>
       </Stack>
-      <PropertiesFilters 
+      <TableFilters 
         onSearch = {FilterProperties}
+        placeHolder='Search Properties...'
       />
 
       {customers.length != 0 && 
@@ -222,24 +203,4 @@ export default function Page(): React.JSX.Element {
       }
     </Stack>
   );
-}
-
-async function ImportProperties(){
-  const querySnapshot = await getDocs(collection(dbHandle, "Properties"));
-  let properties = new Array<Property>();
-  const promises = querySnapshot.docs.map(async (doc) => {
-    let property = doc.data() as Property;
-
-    property.pictureHandle = await getDownloadURL(ref(storageHandle, 'Properties/' + property.picture));
-    properties.push(property);
-  }); 
-  await Promise.all(promises);
-  return properties;
-}
-
-async function handleExport(properties: Property[]){
-  properties.forEach(async (property) => {
-      var docRef = doc(dbHandle, "Properties", property.id);
-      await setDoc(docRef, property);
-  });
 }

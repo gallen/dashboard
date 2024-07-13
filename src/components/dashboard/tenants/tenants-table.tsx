@@ -17,7 +17,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import dayjs from 'dayjs';
+import InputLabel from '@mui/material/InputLabel';
 
 import { useSelection } from '@/hooks/use-selection';
 
@@ -25,55 +25,53 @@ function noop(): void {
   // do nothing
 }
 
-export interface Property {
+export interface Tenant {
   id: string;
   picture: string;
   pictureHandle: string;
-  address: { city: string; state: string; country: string; street: string };
-  BuyTime: dayjs.Dayjs;
-  BuyPrice: string;
-  SellTime: dayjs.Dayjs;
-  SellPrice: string;
-  externalIds: { channel: string; account: string }[];
+  name: string;
+  ssn: string;
+  gender: string;
+  age: number;
+  paymentChannels: {channel: string, account: string}[];
 }
 
-interface PropertiesTableProps {
+interface TenantTableProps {
   count?: number;
   page?: { state: number; update: React.Dispatch<React.SetStateAction<number>>};
-  rows?: Property[];
+  rows?: Tenant[];
   rowsPerPage?: { state: number; update: React.Dispatch<React.SetStateAction<number>>};
-  onDelete?: (properties: Set<string>) => void;
+  onDelete?: (tenants: Set<string>) => void;
 }
+
 interface SelectValues {
   [key: string]: string;
 }
 
-
-export function PropertiesTable({
+export function TenantsTable({
   count = 0,
   rows = [],
   onDelete = noop,
-}: PropertiesTableProps): React.JSX.Element {
+}: TenantTableProps): React.JSX.Element {
   const rowIds = React.useMemo(() => {
-    return rows.map((property) => property.id);
+    return rows.map((tenant) => tenant.id);
   }, [rows]);
 
   const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
   const selectedAny = (selected?.size ?? 0) > 0;
-  const selectedOne = (selected?.size ?? 0) === 1;
-  const selectedSome = selectedAny && (selected?.size ?? 0) < rows.length;
+  const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPage] = React.useState(5);
-  const paginatedProperties = applyPagination(rows, page, rowsPerPage);
+  const paginatedTenants = applyPagination(rows, page, rowsPerPage);
+
   const [selectValues, setSelectValues] = React.useState<SelectValues>(
     rows.reduce((acc, row) => {
       acc[row.id] = 'None';
       return acc;
     }, {} as SelectValues)
   );
-
   return (
     <Card>
       <Box sx={{ overflowX: 'auto' }}>
@@ -105,28 +103,25 @@ export function PropertiesTable({
                 <Button variant="contained" onClick={() => onDelete(selected)}>
                   Delete
                 </Button>
-                {selectedOne && 
-                  <Button variant="contained"> {/* To Be Implemented */}
-                    Edit 
-                  </Button>
-                }
+                <Button variant="contained"> {/* To Be Implemented */}
+                  Select 
+                </Button>
               </Stack>
               </TableCell>
               </>
               : <>
-              <TableCell>Property</TableCell>
-              <TableCell>Address</TableCell>
-              <TableCell>BuyTime</TableCell>
-              <TableCell>BuyPrice</TableCell>
-              <TableCell>SellTime</TableCell>
-              <TableCell>SellPrice</TableCell>
-              <TableCell>External</TableCell>
+              <TableCell>Tenant</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>SSN</TableCell>
+              <TableCell>Gender</TableCell>
+              <TableCell>Age</TableCell>
+              <TableCell>Payment</TableCell>
               </>
               }
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedProperties.map((row) => {
+            {paginatedTenants.map((row) => {
               const isSelected = selected?.has(row.id);
 
               return (
@@ -148,13 +143,10 @@ export function PropertiesTable({
                       <Avatar src={row.pictureHandle} />
                     </Stack>
                   </TableCell>
-                  <TableCell>
-                    {row.address.city}, {row.address.state}, {row.address.country}
-                  </TableCell>
-                  <TableCell>{dayjs(row.BuyTime.toDate()).format('MMM D, YYYY')}</TableCell>
-                  <TableCell>{row.BuyPrice}</TableCell>
-                  <TableCell>{dayjs(row.SellTime.toDate()).format('MMM D, YYYY')}</TableCell>
-                  <TableCell>{row.SellPrice}</TableCell>
+                  <TableCell>{ row.name }</TableCell>
+                  <TableCell>{ row.ssn }</TableCell>
+                  <TableCell>{ row.gender }</TableCell>
+                  <TableCell>{ row.age }</TableCell>
                   <TableCell>
                     <Select 
                       variant='standard'
@@ -167,8 +159,8 @@ export function PropertiesTable({
                       <em>None</em>
                     </MenuItem>
                     { 
-                      row.externalIds.map((external) => {
-                        return <MenuItem key={`${row.id}-${external.channel}`} value = {external.channel}> {external.channel} : {external.account} </MenuItem>
+                      row.paymentChannels.map((channel) => {
+                        return <MenuItem key={`${row.id}-${channel.channel}`} value = {channel.channel}> {channel.channel} : {channel.account} </MenuItem>
                       }) 
                     }
                     </Select>
@@ -193,7 +185,7 @@ export function PropertiesTable({
   );
 }
 
-function applyPagination(rows: Property[], page: number, rowsPerPage: number): Property[] {
+function applyPagination(rows: Tenant[], page: number, rowsPerPage: number): Tenant[] {
   return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }
 

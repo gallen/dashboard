@@ -14,6 +14,8 @@ import { doc, setDoc } from "firebase/firestore";
 import { ref } from 'firebase/storage';
 import { dbHandle, storageHandle } from '@/components/firebase'
 import { uploadBytes } from 'firebase/storage';
+import { ListInput } from '@/components/dashboard/list-input';
+import dayjs from 'dayjs';
 
 export default function Page(): React.JSX.Element {
     const [file, setFile] = React.useState<File | null>(null);
@@ -28,6 +30,12 @@ export default function Page(): React.JSX.Element {
     const buyPrice = React.useRef('');
     const sellTime = React.useRef<Date>();
     const sellPrice = React.useRef('');
+    const external = React.useRef<{ channel: string; account: string }>({channel: '', account: ''});
+    const [externalIds, setExternalIds] = React.useState<{ channel: string; account: string }[]>([]);
+
+    function IdToString(item: { channel: string; account: string }){
+        return item.channel + ': ' + item.account;
+    }
 
     const router = useRouter();
     var fileUrl = '';
@@ -49,7 +57,8 @@ export default function Page(): React.JSX.Element {
             BuyPrice: buyPrice.current,
             SellTime: sellTime.current,
             SellPrice: sellPrice.current,
-        } as Property;
+            externalIds: externalIds,
+        } as unknown as Property;
 
         var docRef = doc(dbHandle, "Properties", newProperty.id);
         await setDoc(docRef, newProperty);
@@ -96,6 +105,23 @@ export default function Page(): React.JSX.Element {
             <TextField id = "filled-basic" label = "BuyPrice" onChange={(e: React.ChangeEvent<HTMLInputElement>) => buyPrice.current = e.target.value} />
             <TextField id = "filled-basic" type = "date" InputLabelProps={{ shrink: true }} label = "SellTime" onChange={(e: React.ChangeEvent<HTMLInputElement>) => sellTime.current = new Date(e.target.value)} />
             <TextField id = "filled-basic" label = "SellPrice" onChange={(e: React.ChangeEvent<HTMLInputElement>) => sellPrice.current = e.target.value} />
+            <Typography variant="h4">External References</Typography>
+            <ListInput 
+                rows = {externalIds} 
+                toString= {IdToString}
+                onItemsChange = {setExternalIds}
+                InputUI={
+                    <Stack direction = "row" spacing = {2}>
+                        <TextField variant = "standard" label="Channel" onChange={(event) => {
+                            external.current.channel = event.target.value;
+                        }}/>
+                        <TextField variant = "standard" label="Account" onChange = {(event) => {
+                            external.current.account = event.target.value;
+                        }}/>
+                        <Button onClick = {(event) => {setExternalIds([...externalIds, structuredClone(external.current)])}}>Add</Button>
+                    </Stack>
+                }
+            />
             <Box
                 alignSelf="flex-end" sx = {{
                     height: 350, 
