@@ -26,48 +26,48 @@ function noop(): void {
   // do nothing
 }
 
-export interface Property {
+export interface Rental {
   id: string;
-  picture: string;
-  pictureHandle: string;
-  address: { city: string; state: string; country: string; street: string };
-  BuyTime: Timestamp | null;
-  BuyPrice: string;
-  SellTime: Timestamp | null;
-  SellPrice: string;
-  externalIds: { channel: string; account: string }[];
+  propertyId: string;
+  tenantId: string[];
+  startDate: Timestamp | null;
+  endDate: Timestamp | null;
+  price: string;
 }
 
-interface PropertiesTableProps {
+interface RentalTableProps {
   count?: number;
   page?: { state: number; update: React.Dispatch<React.SetStateAction<number>>};
-  rows?: Property[];
+  rows?: Rental[];
   rowsPerPage?: { state: number; update: React.Dispatch<React.SetStateAction<number>>};
-  onDelete?: (properties: Set<string>) => void;
-  onEdit?: (property: Set<string>) => void;
-  onRental?: (property: Set<string>, anchor: HTMLElement) => void;
+  onDelete?: (rentals: Set<string>) => void;
+  onEdit?: (rentals: Set<string>, event: React.MouseEvent<HTMLElement>) => void;
 }
 
-export function PropertiesTable({
+interface SelectValues {
+  [key: string]: string;
+}
+
+export function RentalTable({
   count = 0,
   rows = [],
   onDelete = noop,
-  onEdit = noop,
-  onRental = noop
-}: PropertiesTableProps): React.JSX.Element {
+  onEdit = noop
+}: RentalTableProps): React.JSX.Element {
   const rowIds = React.useMemo(() => {
-    return rows.map((property) => property.id);
+    return rows.map((rental) => rental.id);
   }, [rows]);
 
   const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
   const selectedAny = (selected?.size ?? 0) > 0;
   const selectedOne = (selected?.size ?? 0) === 1;
-  const selectedSome = selectedAny && (selected?.size ?? 0) < rows.length;
+  const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPage] = React.useState(5);
-  const paginatedProperties = applyPagination(rows, page, rowsPerPage);
+  const paginatedRentals = applyPagination(rows, page, rowsPerPage);
+  
   return (
     <Card>
       <Box sx={{ overflowX: 'auto' }}>
@@ -95,16 +95,11 @@ export function PropertiesTable({
               </Typography>
               </TableCell>
               <TableCell>
-              <Stack direction = "row" spacing={3}>
+              <Stack direction = "row" spacing={2}>
                 {selectedOne && 
-                  <>
-                  <Button variant="contained" onClick={(event) => onRental(selected, event.currentTarget)}> 
-                    Rent 
-                  </Button>
-                  <Button variant="contained" onClick={() => onEdit(selected)}> 
+                  <Button variant="contained" onClick = {(event) => onEdit(selected, event)}> {/* To Be Implemented */}
                     Edit 
                   </Button>
-                  </>
                 }
                 <Button variant="contained" onClick={() => onDelete(selected)}>
                   Delete
@@ -114,18 +109,16 @@ export function PropertiesTable({
               </>
               : <>
               <TableCell>Property</TableCell>
-              <TableCell>Address</TableCell>
-              <TableCell>BuyTime</TableCell>
-              <TableCell>BuyPrice</TableCell>
-              <TableCell>SellTime</TableCell>
-              <TableCell>SellPrice</TableCell>
-              <TableCell>External</TableCell>
+              <TableCell>Tenant</TableCell>
+              <TableCell>StartDate</TableCell>
+              <TableCell>EndDate</TableCell>
+              <TableCell>Price</TableCell>
               </>
               }
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedProperties.map((row) => {
+            {paginatedRentals.map((row) => {
               const isSelected = selected?.has(row.id);
 
               return (
@@ -142,34 +135,21 @@ export function PropertiesTable({
                       }}
                     />
                   </TableCell>
-                  <TableCell>
-                    <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
-                      <Avatar src={row.pictureHandle} />
-                    </Stack>
-                  </TableCell>
-                  <TableCell>
-                    {row.address.city}, {row.address.state}, {row.address.country}
-                  </TableCell>
-                  <TableCell>{row.BuyTime && dayjs(row.BuyTime.toDate()).format('MMM D, YYYY')}</TableCell>
-                  <TableCell>{row.BuyPrice}</TableCell>
-                  <TableCell>{row.SellTime && dayjs(row.SellTime.toDate()).format('MMM D, YYYY')}</TableCell>
-                  <TableCell>{row.SellPrice}</TableCell>
+                  <TableCell>{row.propertyId}</TableCell>
                   <TableCell>
                     <Select 
-                      variant='standard'
-                      defaultValue='None'
-                      sx = {{ m: 1, minWidth: 120}}
-                    >
-                    <MenuItem value='None'>
-                      <em>None</em>
-                    </MenuItem>
-                    { 
-                      row.externalIds.map((external) => {
-                        return <MenuItem key={`${row.id}-${external.channel}`} value = {external.channel}> {external.channel} : {external.account} </MenuItem>
-                      }) 
-                    }
+                        variant='standard'
+                        defaultValue=''
+                        sx = {{ m: 1, minWidth: 100, maxWidth: 200}}
+                      >
+                      {row.tenantId.map((tenant) => {
+                          return <MenuItem key={`${row.id}-${tenant}`} value = {tenant}> {tenant} </MenuItem>
+                      })}
                     </Select>
                   </TableCell>
+                  <TableCell>{ row.startDate && dayjs(row.startDate.toDate()).format('MMM D, YYYY') }</TableCell>
+                  <TableCell>{ row.endDate && dayjs(row.endDate.toDate()).format('MMM D, YYYY') }</TableCell>
+                  <TableCell>{ row.price }</TableCell>
                 </TableRow>
               );
             })}
@@ -190,28 +170,6 @@ export function PropertiesTable({
   );
 }
 
-function applyPagination(rows: Property[], page: number, rowsPerPage: number): Property[] {
+function applyPagination(rows: Rental[], page: number, rowsPerPage: number): Rental[] {
   return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }
-
-var _DefaultProp = {
-  id : '',
-  picture: '',
-  pictureHandle: '',
-  address: {
-      city: '',
-      state: '',
-      country: '',
-      street: '',
-  },
-  BuyTime: null,
-  BuyPrice: '',
-  SellTime: null,
-  SellPrice: '',
-  externalIds: [],
-} as unknown as Property;
-
-export var DefaultProp = _DefaultProp;
-
-export function SetDefault(property: Property){ DefaultProp = property; }
-export function RevertDefault(){ DefaultProp = _DefaultProp; }

@@ -8,6 +8,8 @@ import Typography from '@mui/material/Typography';
 import { Download as DownloadIcon } from '@phosphor-icons/react/dist/ssr/Download';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { Upload as UploadIcon } from '@phosphor-icons/react/dist/ssr/Upload';
+import { Popper } from '@mui/base/Popper';
+import Box from '@mui/material/Box';
 
 import { TableFilters, ImportTable, ExportTable, DeleteElements, FilterTable } from '@/components/dashboard/table-filters';
 import { TenantsTable } from '@/components/dashboard/tenants/tenants-table';
@@ -16,10 +18,11 @@ import type { Tenant } from '@/components/dashboard/tenants/tenants-table';
 import { doc, setDoc, collection, getDocs, deleteDoc } from "firebase/firestore";
 import { dbHandle } from '@/components/firebase'
 import { useRouter } from 'next/navigation'
-import dayjs from 'dayjs';
+import { SetDefault, RevertDefault } from '@/components/dashboard/tenants/tenants-table';
 
 import { getDownloadURL, ref, deleteObject } from 'firebase/storage';
 import { storageHandle } from '@/components/firebase';
+import { TenantRentalInput } from '@/components/dashboard/tenants/tenant-rental';
 
 //export const metadata = { title: `Customers | Dashboard | ${config.site.name}` } satisfies Metadata;
 
@@ -127,7 +130,8 @@ const customers = [
 ] satisfies Tenant[];
 
 export default function Page(): React.JSX.Element {
-
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const selectedId = React.useRef<string>('');
   const [tenants, setTenants] = React.useState<Tenant[]>([]);
   const router = useRouter();
 
@@ -149,6 +153,17 @@ export default function Page(): React.JSX.Element {
       await deleteObject(storageRef);
     });
     setTenants(newTenants);
+  }
+
+  async function AddRental(property: Set<string>, anchor: HTMLElement){
+    selectedId.current = property.values().next().value;
+    setAnchorEl(anchorEl ? null : anchor);
+  }
+
+  async function EditTenants(tenantIds: Set<string>){
+    let tenant = tenants.find((tenant) => tenant.id === tenantIds.values().next().value);
+    SetDefault(tenant as Tenant);
+    router.push('./tenants/register');
   }
 
   function FilterTenants(filter: string){
@@ -174,7 +189,7 @@ export default function Page(): React.JSX.Element {
         </Stack>
         <div>
           <Button startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained"
-          onClick = {() => router.push('./tenants/register')}>
+          onClick = {() => {RevertDefault(); router.push('./tenants/register');}}>
             Add
           </Button>
         </div>
@@ -190,8 +205,24 @@ export default function Page(): React.JSX.Element {
           count={tenants.length}
           rows={tenants}
           onDelete={DeleteTenants}
+          onEdit={EditTenants}
+          onRental={AddRental}
         />
       }
+      <Popper open={anchorEl != null} anchorEl={anchorEl} placement = {'right-start'}>
+        <Box sx = {{
+          border: 1,
+          borderColor: 'divider',
+          borderStyle: 'solid',
+          padding: 1,
+          backgroundColor: 'background.paper',
+        }}>
+          <TenantRentalInput
+            tenantId = {selectedId.current}
+            close = {() => {setAnchorEl(null);}}
+          />
+        </Box>
+      </Popper>
     </Stack>
   );
 }

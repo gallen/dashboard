@@ -42,16 +42,17 @@ interface TenantTableProps {
   rows?: Tenant[];
   rowsPerPage?: { state: number; update: React.Dispatch<React.SetStateAction<number>>};
   onDelete?: (tenants: Set<string>) => void;
+  onEdit?: (tenants: Set<string>) => void;
+  onRental?: (tenants: Set<string>, anchor: HTMLElement) => void;
 }
 
-interface SelectValues {
-  [key: string]: string;
-}
 
 export function TenantsTable({
   count = 0,
   rows = [],
   onDelete = noop,
+  onEdit = noop,
+  onRental = noop
 }: TenantTableProps): React.JSX.Element {
   const rowIds = React.useMemo(() => {
     return rows.map((tenant) => tenant.id);
@@ -59,6 +60,7 @@ export function TenantsTable({
 
   const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
   const selectedAny = (selected?.size ?? 0) > 0;
+  const selectedOne = (selected?.size ?? 0) === 1;
   const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
   const selectedAll = rows.length > 0 && selected?.size === rows.length;
 
@@ -66,12 +68,6 @@ export function TenantsTable({
   const [rowsPerPage, setRowsPage] = React.useState(5);
   const paginatedTenants = applyPagination(rows, page, rowsPerPage);
 
-  const [selectValues, setSelectValues] = React.useState<SelectValues>(
-    rows.reduce((acc, row) => {
-      acc[row.id] = 'None';
-      return acc;
-    }, {} as SelectValues)
-  );
   return (
     <Card>
       <Box sx={{ overflowX: 'auto' }}>
@@ -100,11 +96,18 @@ export function TenantsTable({
               </TableCell>
               <TableCell>
               <Stack direction = "row" spacing={3}>
+                {selectedOne && 
+                  <>
+                  <Button variant="contained" onClick={(event) => onRental(selected, event.currentTarget)}> 
+                    Rent 
+                  </Button>
+                  <Button variant="contained" onClick = {() => onEdit(selected)}> {/* To Be Implemented */}
+                    Edit 
+                  </Button>
+                  </>
+                }
                 <Button variant="contained" onClick={() => onDelete(selected)}>
                   Delete
-                </Button>
-                <Button variant="contained"> {/* To Be Implemented */}
-                  Select 
                 </Button>
               </Stack>
               </TableCell>
@@ -151,9 +154,7 @@ export function TenantsTable({
                     <Select 
                       variant='standard'
                       defaultValue='None'
-                      value = {selectValues[row.id]}
                       sx = {{ m: 1, minWidth: 120}}
-                      onChange = {(event) => { setSelectValues({ ...selectValues, [row.id]: event.target.value }); }}
                     >
                     <MenuItem value='None'>
                       <em>None</em>
@@ -189,3 +190,18 @@ function applyPagination(rows: Tenant[], page: number, rowsPerPage: number): Ten
   return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }
 
+var _DefaultTenant = {
+  id : '',
+  picture : '',
+  pictureHandle : '',
+  name : '',
+  ssn : '',
+  gender: '',
+  age: 0,
+  paymentChannels: [],
+} as unknown as Tenant;
+
+export var DefaultTenant = _DefaultTenant;
+
+export function SetDefault(tenant: Tenant){ DefaultTenant = tenant; }
+export function RevertDefault(){ DefaultTenant = _DefaultTenant; }

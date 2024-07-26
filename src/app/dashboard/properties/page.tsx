@@ -8,10 +8,13 @@ import Typography from '@mui/material/Typography';
 import { Download as DownloadIcon } from '@phosphor-icons/react/dist/ssr/Download';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { Upload as UploadIcon } from '@phosphor-icons/react/dist/ssr/Upload';
+import { Popper } from '@mui/base/Popper';
+import Box from '@mui/material/Box';
 
 import { TableFilters, ImportTable, ExportTable, DeleteElements, FilterTable } from '@/components/dashboard/table-filters';
-import { PropertiesTable } from '@/components/dashboard/properties/properties-table';
+import { DefaultProp, PropertiesTable } from '@/components/dashboard/properties/properties-table';
 import type { Property } from '@/components/dashboard/properties/properties-table';
+import { SetDefault, RevertDefault } from '@/components/dashboard/properties/properties-table';
 
 import { doc, deleteDoc } from "firebase/firestore";
 import { dbHandle } from '@/components/firebase'
@@ -20,6 +23,8 @@ import dayjs from 'dayjs';
 
 import { getDownloadURL, ref, deleteObject } from 'firebase/storage';
 import { storageHandle } from '@/components/firebase';
+import { Timestamp } from 'firebase/firestore';
+import { PropertyRentalInput } from '@/components/dashboard/properties/property-rental';
 
 //export const metadata = { title: `Customers | Dashboard | ${config.site.name}` } satisfies Metadata;
 
@@ -29,9 +34,9 @@ const customers = [
     picture: 'avatar-10.png',
     pictureHandle: '',
     address: { city: 'Madrid', country: 'Spain', state: 'Comunidad de Madrid', street: '4158 Hedge Street' },
-    BuyTime: dayjs().subtract(2, 'hours'),
+    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours'),
+    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     SellPrice: '€ 1,500,000',
     externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
@@ -40,9 +45,9 @@ const customers = [
     picture: 'avatar-9.png',
     pictureHandle: '',
     address: { city: 'Carson City', country: 'USA', state: 'Nevada', street: '2188 Armbrester Drive' },
-    BuyTime: dayjs().subtract(2, 'hours'),
+    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours'),
+    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     SellPrice: '€ 1,500,000',
     externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
@@ -51,9 +56,9 @@ const customers = [
     picture: 'avatar-8.png',
     pictureHandle: '',
     address: { city: 'North Canton', country: 'USA', state: 'Ohio', street: '4894 Lakeland Park Drive' },
-    BuyTime: dayjs().subtract(2, 'hours'),
+    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours'),
+    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     SellPrice: '€ 1,500,000',
     externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
@@ -62,9 +67,9 @@ const customers = [
     picture: 'avatar-7.png',
     pictureHandle: '',
     address: { city: 'Salt Lake City', country: 'USA', state: 'Utah', street: '368 Lamberts Branch Road' },
-    BuyTime: dayjs().subtract(2, 'hours'),
+    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours'),
+    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     SellPrice: '€ 1,500,000',
     externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
@@ -73,9 +78,9 @@ const customers = [
     picture: 'avatar-6.png',
     pictureHandle: '',
     address: { city: 'Murray', country: 'USA', state: 'Utah', street: '3934 Wildrose Lane' },
-    BuyTime: dayjs().subtract(2, 'hours'),
+    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours'),
+    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     SellPrice: '€ 1,500,000',
     externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
@@ -84,9 +89,9 @@ const customers = [
     picture: 'avatar-5.png',
     pictureHandle: '',
     address: { city: 'Atlanta', country: 'USA', state: 'Georgia', street: '1865 Pleasant Hill Road' },
-    BuyTime: dayjs().subtract(2, 'hours'),
+    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours'),
+    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     SellPrice: '€ 1,500,000',
     externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
@@ -96,9 +101,9 @@ const customers = [
     picture: 'avatar-4.png',
     pictureHandle: '',
     address: { city: 'Berkeley', country: 'USA', state: 'California', street: '317 Angus Road' },
-    BuyTime: dayjs().subtract(2, 'hours'),
+    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours'),
+    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     SellPrice: '€ 1,500,000',
     externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
@@ -107,9 +112,9 @@ const customers = [
     picture: 'avatar-3.png',
     pictureHandle: '',
     address: { city: 'Cleveland', country: 'USA', state: 'Ohio', street: '2849 Fulton Street' },
-    BuyTime: dayjs().subtract(2, 'hours'),
+    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours'),
+    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     SellPrice: '€ 1,500,000',
     externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
@@ -118,9 +123,9 @@ const customers = [
     picture: 'avatar-2.png',
     pictureHandle: '', 
     address: { city: 'Los Angeles', country: 'USA', state: 'California', street: '1798 Hickory Ridge Drive' },
-    BuyTime: dayjs().subtract(2, 'hours'),
+    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours'),
+    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     SellPrice: '€ 1,500,000',
     externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
@@ -129,16 +134,17 @@ const customers = [
     picture: 'avatar-1.png',
     pictureHandle: '',
     address: { city: 'San Diego', country: 'USA', state: 'California', street: '75247' },
-    BuyTime: dayjs().subtract(2, 'hours'),
+    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     BuyPrice: '€ 1,200,000',
-    SellTime: dayjs().subtract(2, 'hours'),
+    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
     SellPrice: '€ 1,500,000',
     externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
   },
 ] satisfies Property[];
 
 export default function Page(): React.JSX.Element {
-
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const selectedId = React.useRef<string>('');
   const [properties, setProperties] = React.useState<Property[]>([]);
   const router = useRouter();
 
@@ -152,6 +158,11 @@ export default function Page(): React.JSX.Element {
     });
   }, []);
 
+  async function AddRental(property: Set<string>, anchor: HTMLElement){
+    selectedId.current = property.values().next().value;
+    setAnchorEl(anchorEl ? null : anchor);
+  }
+
   async function DeleteProperties(propertyIds: Set<string>){
     let newProperties = await DeleteElements(properties, (property: Property) => propertyIds.has(property.id), 
       async (property: Property) => {
@@ -160,6 +171,12 @@ export default function Page(): React.JSX.Element {
       await deleteObject(storageRef);
     });
     setProperties(newProperties);
+  }
+
+  async function EditProperty(propertyId: Set<string>){
+    let property = properties.find((property) => property.id === propertyId.values().next().value);
+    SetDefault(property as Property);
+    router.push('./properties/register');
   }
 
   function FilterProperties(filter: string){
@@ -184,7 +201,7 @@ export default function Page(): React.JSX.Element {
         </Stack>
         <div>
           <Button startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained"
-          onClick = {() => router.push('./properties/register')}>
+          onClick = {() => {RevertDefault(); router.push('./properties/register');}}>
             Add
           </Button>
         </div>
@@ -199,8 +216,24 @@ export default function Page(): React.JSX.Element {
           count={properties.length}
           rows={properties}
           onDelete={DeleteProperties}
+          onEdit={EditProperty}
+          onRental={AddRental}
         />
       }
+      <Popper open={anchorEl != null} anchorEl={anchorEl} placement = {'right-start'}>
+        <Box sx = {{
+          border: 1,
+          borderColor: 'divider',
+          borderStyle: 'solid',
+          padding: 1,
+          backgroundColor: 'background.paper',
+        }}>
+          <PropertyRentalInput
+            propertyId={selectedId.current}
+            close = {() => {setAnchorEl(null);}}
+          />
+        </Box>
+      </Popper>
     </Stack>
   );
 }

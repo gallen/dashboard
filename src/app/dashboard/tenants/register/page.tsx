@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useEffect } from 'react';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
@@ -15,46 +16,53 @@ import { ref } from 'firebase/storage';
 import { dbHandle, storageHandle } from '@/components/firebase'
 import { uploadBytes } from 'firebase/storage';
 import { ListInput } from '@/components/dashboard/list-input';
+import { DefaultTenant, RevertDefault } from '@/components/dashboard/tenants/tenants-table';
 
 export default function Page(): React.JSX.Element {
-    const [file, setFile] = React.useState<File | null>(null);
-    const nameRef = React.useRef('');
-    const ssnRef = React.useRef('');
-    const genderRef = React.useRef('');
-    const ageRef = React.useRef(0);
-    const paymentRef = React.useRef('');
+    const [fileUrl, setFileUrl] = React.useState<string>('');
+    const [reload, setReload] = React.useState<boolean>(false);
+    const tenantRef = React.useRef(DefaultTenant);
     const methodRef = React.useRef<{ channel: string; account: string }>({channel: '', account: ''});
-    const [methods, setMethods] = React.useState<{ channel: string; account: string }[]>([]);
+    const router = useRouter();
+
+    useEffect(() => {
+        if(tenantRef.current.id == '') tenantRef.current.id = Math.random().toString(36).substring(7);
+        if(tenantRef.current.pictureHandle != '') setFileUrl(tenantRef.current.pictureHandle);
+    }, []);
+
     function IdToString(item: { channel: string; account: string }){
         return item.channel + ': ' + item.account;
     }
 
-    const router = useRouter();
     const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>): void => {
         if (e.target.files && e.target.files.length > 0) {
-            setFile(e.target.files[0]);
+            setFileUrl(URL.createObjectURL(e.target.files[0]));
         }
     }; 
 
     async function handleExport(){
-        if(file == null) return;
-        let tenantId = Math.random().toString(36).substring(7);
-        var newTenant = {
-            id: tenantId,
-            picture: tenantId + '.png',
-            name: nameRef.current,
-            ssn: ssnRef.current,
-            gender: genderRef.current,
-            age: ageRef.current,
-            paymentChannels: methods,
-        } as Tenant;
+        if(fileUrl == '') return;
+        tenantRef.current.picture = tenantRef.current.id + '.png';
+        var docRef = doc(dbHandle, "Tenants", tenantRef.current.id);
+        var storageRef = ref(storageHandle, 'Tenants/' + tenantRef.current.picture);
 
-        var docRef = doc(dbHandle, "Tenants", newTenant.id);
-        await setDoc(docRef, newTenant);
+        let response = await fetch(fileUrl);
+        let data = await response.blob();
+        let file = new File([data], tenantRef.current.picture);
 
-        var storageRef = ref(storageHandle, 'Tenants/' + newTenant.picture);
+        await setDoc(docRef, tenantRef.current);
         uploadBytes(storageRef, file as File);
         router.push('../tenants');
+    }
+
+    function SetPaymentMethods(paymentChannels: any[]){
+        tenantRef.current.paymentChannels = paymentChannels;
+        setReload(!reload);
+    }
+
+    function SetPaymentInput(paymentChannel: any){
+        methodRef.current = paymentChannel;
+        setReload(!reload);
     }
 
     return (
@@ -69,8 +77,8 @@ export default function Page(): React.JSX.Element {
                     border: '1px dashed black',
                     bgcolor: 'gray',
                     color: 'primary.contrastText',
-                    backgroundImage: file == null ? 'none' : `url(${URL.createObjectURL(file)})`,
-                    contentVisibility: file == null ? 'visible' : 'hidden',
+                    backgroundImage: fileUrl == '' ? 'none' : `url(${fileUrl})`,
+                    contentVisibility: fileUrl == '' ? 'visible' : 'hidden',
                 }} textAlign = 'center'>
                     
                     <Image src = '/assets/upload.png' alt = "image" width = {200} height = {200}/>
@@ -82,27 +90,28 @@ export default function Page(): React.JSX.Element {
                 </label>
                 <Stack spacing={2} sx={{ flexGrow: 1 }} >
                         <Typography variant="h4">Personal Info</Typography>
-                        <TextField id="filled-basic" label="Name" onChange={(e: React.ChangeEvent<HTMLInputElement>) => nameRef.current = e.target.value} />
-                        <TextField id="filled-basic" label="SSN" onChange={(e: React.ChangeEvent<HTMLInputElement>) => ssnRef.current = e.target.value} />
-                        <TextField id="filled-basic" label="Gender" onChange={(e: React.ChangeEvent<HTMLInputElement>) => genderRef.current = e.target.value} />
-                        <TextField id="filled-basic" label="Age" type = "number" onChange={(e: React.ChangeEvent<HTMLInputElement>) => ageRef.current = parseInt(e.target.value)} />
+                        <TextField id="filled-basic" label="Name" defaultValue = {tenantRef.current.name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => tenantRef.current.name = e.target.value} />
+                        <TextField id="filled-basic" label="SSN" defaultValue = {tenantRef.current.ssn} onChange={(e: React.ChangeEvent<HTMLInputElement>) => tenantRef.current.ssn = e.target.value} />
+                        <TextField id="filled-basic" label="Gender" defaultValue = {tenantRef.current.gender} onChange={(e: React.ChangeEvent<HTMLInputElement>) => tenantRef.current.gender = e.target.value} />
+                        <TextField id="filled-basic" label="Age" defaultValue = {tenantRef.current.age} type = "number" onChange={(e: React.ChangeEvent<HTMLInputElement>) => tenantRef.current.age = parseInt(e.target.value)} />
                 </Stack> 
             </Stack>
             <Typography variant="h4">Payment</Typography>
             <ListInput 
-                rows = {methods} 
+                rows = {tenantRef.current.paymentChannels} 
                 toString= {IdToString}
-                onItemsChange = {setMethods}
+                onItemsChange = {SetPaymentMethods}
+                onInputChange={SetPaymentInput}
                 InputUI={
                     <Stack direction = "row" spacing = {2}>
-                        <TextField variant = "standard" label="Channel" onChange={(event) => {
+                        <TextField variant = "standard" label="Channel" defaultValue = {methodRef.current.channel} onChange={(event) => {
                             methodRef.current.channel = event.target.value;
                         }}/>
-                        <TextField variant = "standard" label="Account" onChange = {(event) => {
+                        <TextField variant = "standard" label="Account" defaultValue = {methodRef.current.account} onChange = {(event) => {
                             methodRef.current.account = event.target.value;
                         }}/>
-                        <Button onClick = {(event) => {setMethods([...methods, structuredClone(methodRef.current)])}}>Add</Button>
-                    </Stack>
+                        <Button onClick = {(event) => {SetPaymentMethods([...tenantRef.current.paymentChannels, structuredClone(methodRef.current)])}}>Add</Button>
+                    </Stack> 
                 }
             />
             <Box

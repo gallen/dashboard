@@ -15,6 +15,7 @@ interface ListProps {
     InputUI?: React.ReactElement;
     toString?: (item: any) => string;
     onItemsChange?: (items: any[]) => void;
+    onInputChange?: (item: any) => void;
 }
 
 export function ListInput(
@@ -23,6 +24,7 @@ export function ListInput(
     InputUI = <></>,
     toString = (item: any) => item.toString(),
     onItemsChange = (items: any[]) => {},
+    onInputChange = (item: any) => {}
 }: ListProps) : React.ReactElement{ 
     const rowIds = React.useMemo(() => {
         return rows.map((row) => toString(row));
@@ -30,11 +32,19 @@ export function ListInput(
 
     const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
     const selectedAny = (selected?.size ?? 0) > 0;
+    const selectedOne = (selected?.size ?? 0) === 1;
     const selectedSome = (selected?.size ?? 0) > 0 && (selected?.size ?? 0) < rows.length;
     const selectedAll = rows.length > 0 && selected?.size === rows.length;
 
     function Delete(){
         let newRows = rows.filter((row) => !selected?.has(toString(row)));
+        onItemsChange(newRows);
+    }
+
+    function Edit(){
+        let newRows = rows.filter((row) => !selected?.has(toString(row)));
+        let selectedRow = rows.filter((row) => selected?.has(toString(row)));
+        onInputChange(selectedRow[0]);
         onItemsChange(newRows);
     }
 
@@ -57,9 +67,11 @@ export function ListInput(
                 <Button onClick={Delete}>
                     Delete
                 </Button>
-                <Button> {/* To Be Implemented */}
-                    Edit 
-                </Button>
+                {selectedOne &&
+                    <Button onClick={Edit}> {/* To Be Implemented */}
+                        Edit 
+                    </Button>
+                }
                 </>
                 :
                 InputUI
