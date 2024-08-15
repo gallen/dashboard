@@ -1,90 +1,22 @@
-## [Devias Kit - React](https://material-kit-react.devias.io/)
+## MyRealEstate
 
-![license](https://img.shields.io/badge/license-MIT-blue.svg)
+Offers organized tracking of income and expenses for small realtors & companies. It is built to track between 5-100 properties with a similar amount of tenants. 
+Information is stored on a remote cloud server. 
 
-[![Devias Kit - React](https://github.com/devias-io/material-kit-react/blob/main/public/assets/thumbnail.png)](https://material-kit-react.devias.io/)
+### Authentication
+<img width="727" alt="Screenshot 2024-08-15 at 1 00 35 PM" src="https://github.com/user-attachments/assets/e64f7a8c-e16f-4cb4-8d67-2292f7520458">
 
-> Free React Admin Dashboard made with [MUI's](https://mui.com) components, [React](https://reactjs.org) and of course [Next.js](https://github.com/vercel/next.js) to boost your app development process!
+### Properties
+<img width="1220" alt="Screenshot 2024-08-15 at 1 03 03 PM" src="https://github.com/user-attachments/assets/9690ab4d-e44f-49d9-bc1b-7b84c8b8437f">
 
-## Pages 
+### Tenants
+<img width="1218" alt="Screenshot 2024-08-15 at 1 03 25 PM" src="https://github.com/user-attachments/assets/f831a8c0-28d8-45cc-b433-836f0bce0707">
 
-- [Dashboard](https://material-kit-react.devias.io)
-- [Customers](https://material-kit-react.devias.io/dashboard/customers)
-- [Integrations](https://material-kit-react.devias.io/dashboard/integrations)
-- [Settings](https://material-kit-react.devias.io/dashboard/settings)
-- [Account](https://material-kit-react.devias.io/dashboard/account)
-- [Sign In](https://material-kit-react.devias.io/auth/sign-in)
-- [Sign Up](https://material-kit-react.devias.io/auth/sign-up)
-- [Reset Password](https://material-kit-react.devias.io/auth/reset-password)
+### Rentals
+<img width="1226" alt="Screenshot 2024-08-15 at 1 03 44 PM" src="https://github.com/user-attachments/assets/1547561e-7d97-4894-8ac2-ff1e5498ecce">
 
-## Free Figma Community File
+### Expenses
+<img width="1227" alt="Screenshot 2024-08-15 at 1 04 06 PM" src="https://github.com/user-attachments/assets/1528fbff-8a10-4962-a42b-a442802a88ca">
 
-- [Duplicate File](https://www.figma.com/file/b3L1Np4RYiicZAOMopHNkm/Devias-Dashboard-Design-Library-Kit)
-
-## Upgrade to PRO Version
-
-We also have a pro version of this product which bundles even more pages and components if you want
-to save more time and design efforts :)
-
-| Free Version (this one)  | [Devias Kit Pro](https://mui.com/store/items/devias-kit-pro/)                |
-| ------------------------ | :--------------------------------------------------------------------------- |
-| **8** Pages              | **80+** Pages                                                                |
-| ✔ Custom Authentication  | ✔ Authentication with **Amplify**, **Auth0**, **Firebase** and **Supabase**  |
-| -                        | ✔ Vite Version                                                               |
-| -                        | ✔ Dark Mode Support                                                          |
-| -                        | ✔ Complete Users Flows                                                       |
-| -                        | ✔ Premium Technical Support                                                  |
-
-## Quick start
-
-- Clone the repo: `git clone https://github.com/devias-io/material-kit-react.git`
-- Make sure your Node.js and npm versions are up to date
-- Install dependencies: `npm install` or `yarn`
-- Start the server: `npm run dev` or `yarn dev`
-- Open browser: `http://localhost:3000`
-
-## File Structure
-
-Within the download you'll find the following directories and files:
-
-```
-┌── .editorconfig
-├── .eslintrc.js
-├── .gitignore
-├── CHANGELOG.md
-├── LICENSE.md
-├── next-env.d.ts
-├── next.config.js
-├── package.json
-├── README.md
-├── tsconfig.json
-├── public
-└── src
-	├── components
-	├── contexts
-	├── hooks
-	├── lib
-	├── styles
-	├── types
-	└── app
-		├── layout.tsx
-		├── page.tsx
-		├── auth
-		└── dashboard
-```
-
-## Resources
-
-- More freebies like this one: https://devias.io
-
-## Reporting Issues:
-
-- [Github Issues Page](https://github.com/devias-io/material-kit-react/issues)
-
-## License
-
-- Licensed under [MIT](https://github.com/devias-io/material-kit-react/blob/main/LICENSE.md)
-
-## Contact Us
-
-- Email Us: support@deviasio.zendesk.com
+### Adding Information
+<img width="1103" alt="Screenshot 2024-08-15 at 1 04 26 PM" src="https://github.com/user-attachments/assets/61017392-cad4-47d8-bb74-eae5a9bb22a1">
