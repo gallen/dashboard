@@ -15,8 +15,8 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
+import Badge from '@mui/material/Badge';
+import { ClipboardText } from '@phosphor-icons/react';
 import dayjs from 'dayjs';
 
 import { useSelection } from '@/hooks/use-selection';
@@ -26,37 +26,33 @@ function noop(): void {
   // do nothing
 }
 
-export interface Property {
+export interface Expense {
   id: string;
-  picture: string;
-  pictureHandle: string;
-  address: { city: string; state: string; country: string; street: string };
-  BuyTime: Timestamp | null;
-  BuyPrice: string;
-  SellTime: Timestamp | null;
-  SellPrice: string;
-  externalIds: { channel: string; account: string }[];
+  propertyId: string;
+  Date: Timestamp | null;
+  Amount: string;
+  Description: string;
+  Invoice: string;
+  InvoiceHandle: string;
 }
 
-interface PropertiesTableProps {
+interface ExpensesTableProps {
   count?: number;
   page?: { state: number; update: React.Dispatch<React.SetStateAction<number>>};
-  rows?: Property[];
+  rows?: Expense[];
   rowsPerPage?: { state: number; update: React.Dispatch<React.SetStateAction<number>>};
   onDelete?: (properties: Set<string>) => void;
-  onEdit?: (property: Set<string>) => void;
-  onRental?: (property: Set<string>, anchor: HTMLElement) => void;
+  onEdit?: (expense: Set<string>) => void;
 }
 
-export function PropertiesTable({
+export function ExpensesTable({
   count = 0,
   rows = [],
   onDelete = noop,
   onEdit = noop,
-  onRental = noop
-}: PropertiesTableProps): React.JSX.Element {
+}: ExpensesTableProps): React.JSX.Element {
   const rowIds = React.useMemo(() => {
-    return rows.map((property) => property.id);
+    return rows.map((expense) => expense.id);
   }, [rows]);
 
   const { selectAll, deselectAll, selectOne, deselectOne, selected } = useSelection(rowIds);
@@ -98,9 +94,6 @@ export function PropertiesTable({
               <Stack direction = "row" spacing={3}>
                 {selectedOne && 
                   <>
-                  <Button variant="contained" onClick={(event) => onRental(selected, event.currentTarget)}> 
-                    Rent 
-                  </Button>
                   <Button variant="contained" onClick={() => onEdit(selected)}> 
                     Edit 
                   </Button>
@@ -114,12 +107,10 @@ export function PropertiesTable({
               </>
               : <>
               <TableCell>Property</TableCell>
-              <TableCell>Address</TableCell>
-              <TableCell>BuyTime</TableCell>
-              <TableCell>BuyPrice</TableCell>
-              <TableCell>SellTime</TableCell>
-              <TableCell>SellPrice</TableCell>
-              <TableCell>External</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>Amount</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Invoice</TableCell>
               </>
               }
             </TableRow>
@@ -142,33 +133,22 @@ export function PropertiesTable({
                       }}
                     />
                   </TableCell>
+                  <TableCell> {row.propertyId} </TableCell>
+                  <TableCell>{row.Date && dayjs(row.Date.toDate()).format('MMM D, YYYY')}</TableCell>
+                  <TableCell>{row.Amount}</TableCell>
+                  <TableCell>{row.Description}</TableCell>
                   <TableCell>
                     <Stack sx={{ alignItems: 'center' }} direction="row" spacing={2}>
-                      <Avatar src={row.pictureHandle} variant='rounded'/>
-                    </Stack>
-                  </TableCell>
-                  <TableCell>
-                    {row.address.city}, {row.address.state}, {row.address.country}
-                  </TableCell>
-                  <TableCell>{row.BuyTime && dayjs(row.BuyTime.toDate()).format('MMM D, YYYY')}</TableCell>
-                  <TableCell>{row.BuyPrice}</TableCell>
-                  <TableCell>{row.SellTime && dayjs(row.SellTime.toDate()).format('MMM D, YYYY')}</TableCell>
-                  <TableCell>{row.SellPrice}</TableCell>
-                  <TableCell>
-                    <Select 
-                      variant='standard'
-                      defaultValue='None'
-                      sx = {{ m: 1, minWidth: 120}}
+                    <Badge
+                      overlap="circular"
+                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                      badgeContent={
+                        <ClipboardText size={24}/>
+                      }
                     >
-                    <MenuItem value='None'>
-                      <em>None</em>
-                    </MenuItem>
-                    { 
-                      row.externalIds.map((external) => {
-                        return <MenuItem key={`${row.id}-${external.channel}`} value = {external.channel}> {external.channel} : {external.account} </MenuItem>
-                      }) 
-                    }
-                    </Select>
+                      <Avatar src={row.InvoiceHandle} sx={{ width: 100, height: 100}} variant="square"/>
+                    </Badge>
+                    </Stack>
                   </TableCell>
                 </TableRow>
               );
@@ -190,27 +170,21 @@ export function PropertiesTable({
   );
 }
 
-function applyPagination(rows: Property[], page: number, rowsPerPage: number): Property[] {
+function applyPagination(rows: Expense[], page: number, rowsPerPage: number): Expense[] {
   return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 }
 
-var _DefaultProp = {
-  id : '',
-  picture: '',
-  pictureHandle: '',
-  address: {
-      city: '',
-      state: '',
-      country: '',
-      street: '',
-  },
-  BuyTime: null,
-  BuyPrice: '',
-  SellTime: null,
-  SellPrice: '',
-  externalIds: [],
-} as unknown as Property;
 
-export var DefaultProp = {..._DefaultProp} as Property;
-export function SetDefault(property: Property){ DefaultProp = {...property} as Property; }
-export function RevertDefault(){ DefaultProp = {..._DefaultProp}; }
+var _DefaultExpense = {
+  id: '',
+  propertyId: '',
+  Date: null,
+  Amount: '',
+  Description: '',
+  Invoice: '',
+  InvoiceHandle: '',
+} as unknown as Expense;
+
+export var DefaultExpense = {..._DefaultExpense};
+export function SetDefault(expense: Expense){ DefaultExpense = {...expense}; }
+export function RevertDefault(){ DefaultExpense = {..._DefaultExpense}; }

@@ -201,7 +201,7 @@ var _DefaultTenant = {
   paymentChannels: [],
 } as unknown as Tenant;
 
-export var DefaultTenant = _DefaultTenant;
+export var DefaultTenant = {..._DefaultTenant};
 
-export function SetDefault(tenant: Tenant){ DefaultTenant = tenant; }
-export function RevertDefault(){ DefaultTenant = _DefaultTenant; }
+export function SetDefault(tenant: Tenant){ DefaultTenant = {...tenant}; }
+export function RevertDefault(){ DefaultTenant = {..._DefaultTenant}; }

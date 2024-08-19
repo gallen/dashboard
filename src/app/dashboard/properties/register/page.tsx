@@ -52,7 +52,7 @@ export default function Page(): React.JSX.Element {
         let file = new File([data], propertyRef.current.picture);
 
         await setDoc(docRef, propertyRef.current);
-        uploadBytes(storageRef, file);
+        await uploadBytes(storageRef, file);
         router.push('../properties');
     }
 

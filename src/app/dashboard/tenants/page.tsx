@@ -26,109 +26,6 @@ import { TenantRentalInput } from '@/components/dashboard/tenants/tenant-rental'
 
 //export const metadata = { title: `Customers | Dashboard | ${config.site.name}` } satisfies Metadata;
 
-const customers = [
-  {
-    id: 'USR-011',
-    picture: 'avatar-1.png',
-    pictureHandle: '',
-    name: 'Alice Smith',
-    ssn: '123-45-6789',
-    gender: 'female',
-    age: 28,
-    paymentChannels: [{ channel: 'Paypal', account: '917263' }]
-  },
-  {
-    id: 'USR-012',
-    picture: 'avatar-2.png',
-    pictureHandle: '',
-    name: 'Bob Johnson',
-    ssn: '987-65-4321',
-    gender: 'male',
-    age: 42,
-    paymentChannels: [{ channel: 'Venmo', account: '562738' }]
-  },
-  {
-    id: 'USR-013',
-    picture: 'avatar-3.png',
-    pictureHandle: '',
-    name: 'Carol Davis',
-    ssn: '234-56-7890',
-    gender: 'female',
-    age: 30,
-    paymentChannels: [{ channel: 'Paypal', account: '483920' }]
-  },
-  {
-    id: 'USR-014',
-    picture: 'avatar-4.png',
-    pictureHandle: '',
-    name: 'David Miller',
-    ssn: '345-67-8901',
-    gender: 'male',
-    age: 36,
-    paymentChannels: [{ channel: 'CashApp', account: '719283' }]
-  },
-  {
-    id: 'USR-015',
-    picture: 'avatar-5.png',
-    pictureHandle: '',
-    name: 'Eve Wilson',
-    ssn: '456-78-9012',
-    gender: 'female',
-    age: 25,
-    paymentChannels: [{ channel: 'Paypal', account: '102938' }]
-  },
-  {
-    id: 'USR-016',
-    picture: 'avatar-6.png',
-    pictureHandle: '',
-    name: 'Frank Brown',
-    ssn: '567-89-0123',
-    gender: 'male',
-    age: 50,
-    paymentChannels: [{ channel: 'Venmo', account: '209384' }]
-  },
-  {
-    id: 'USR-017',
-    picture: 'avatar-7.png',
-    pictureHandle: '',
-    name: 'Grace Moore',
-    ssn: '678-90-1234',
-    gender: 'female',
-    age: 32,
-    paymentChannels: [{ channel: 'CashApp', account: '304958' }]
-  },
-  {
-    id: 'USR-018',
-    picture: 'avatar-8.png',
-    pictureHandle: '',
-    name: 'Henry Taylor',
-    ssn: '789-01-2345',
-    gender: 'male',
-    age: 45,
-    paymentChannels: [{ channel: 'Paypal', account: '123456' }]
-  },
-  {
-    id: 'USR-019',
-    picture: 'avatar-9.png',
-    pictureHandle: '',
-    name: 'Ivy Anderson',
-    ssn: '890-12-3456',
-    gender: 'female',
-    age: 29,
-    paymentChannels: [{ channel: 'Venmo', account: '654321' }]
-  },
-  {
-    id: 'USR-020',
-    picture: 'avatar-10.png',
-    pictureHandle: '',
-    name: 'Jack Thomas',
-    ssn: '901-23-4567',
-    gender: 'male',
-    age: 39,
-    paymentChannels: [{ channel: 'CashApp', account: '789012' }]
-  }
-] satisfies Tenant[];
-
 export default function Page(): React.JSX.Element {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const selectedId = React.useRef<string>('');
@@ -171,6 +68,39 @@ export default function Page(): React.JSX.Element {
     setTenants(newTenants);
   }
 
+  const DownloadJSON = (data : any, fileName : string) => {
+      const jsonData = new Blob([JSON.stringify(data)], { type: 'application/json' });
+      const jsonURL = URL.createObjectURL(jsonData);
+      const link = document.createElement('a');
+      link.href = jsonURL;
+      link.download = `${fileName}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  }
+
+  
+  const UploadJSON = (e : React.ChangeEvent<HTMLInputElement>) => {
+    async function ExportTenants(tenants: Tenant[]){
+      for(let tenant of tenants){
+        var docRef = doc(dbHandle, "Tenants", tenant.id);
+        await setDoc(docRef, tenant);
+      }
+    }
+
+    if (e.target.files && e.target.files.length > 0) {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        if(!e.target) return;
+        const data = e.target.result;
+        const newTenants = (JSON.parse(data as string) as Tenant[]).filter((tenant) => !tenants.some((t) => t.id === tenant.id));
+        setTenants([...tenants, ...newTenants]);
+        ExportTenants(newTenants);
+      }
+      reader.readAsText(e.target.files[0]);
+    }
+  }
+
 
   return (
     <Stack spacing={3}>
@@ -178,11 +108,12 @@ export default function Page(): React.JSX.Element {
         <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
           <Typography variant="h4">Tenants</Typography>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-            <Button color="inherit" startIcon={<UploadIcon fontSize="var(--icon-fontSize-md)" />}>
+            <Button color="inherit" component="label" startIcon={<UploadIcon fontSize="var(--icon-fontSize-md)" />}>
+              <input type = "file" id = "fileInput" accept = ".json,application/json" onChange={UploadJSON} hidden/>
               Import
             </Button>
             <Button color="inherit" startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />}
-            onClick = {() => ExportTable(customers, 'Tenants', (element: Tenant) => element.id)}>
+            onClick = {() => DownloadJSON(tenants, "Tenants")}>
               Export
             </Button>
           </Stack>
@@ -200,7 +131,7 @@ export default function Page(): React.JSX.Element {
         placeHolder='Search Tenants...'
       />
 
-      {customers.length != 0 && 
+      {tenants.length != 0 && 
         <TenantsTable
           count={tenants.length}
           rows={tenants}

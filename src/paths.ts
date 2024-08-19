@@ -10,6 +10,7 @@ export const paths = {
     properties: '/dashboard/properties',
     tenants: '/dashboard/tenants',
     renting: '/dashboard/renting',
+    expenses: '/dashboard/expenses',
   },
   errors: { notFound: '/errors/not-found' },
 } as const;

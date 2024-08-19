@@ -28,120 +28,6 @@ import { PropertyRentalInput } from '@/components/dashboard/properties/property-
 
 //export const metadata = { title: `Customers | Dashboard | ${config.site.name}` } satisfies Metadata;
 
-const customers = [
-  {
-    id: 'USR-010',
-    picture: 'avatar-10.png',
-    pictureHandle: '',
-    address: { city: 'Madrid', country: 'Spain', state: 'Comunidad de Madrid', street: '4158 Hedge Street' },
-    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    BuyPrice: '€ 1,200,000',
-    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    SellPrice: '€ 1,500,000',
-    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
-  },
-  {
-    id: 'USR-009',
-    picture: 'avatar-9.png',
-    pictureHandle: '',
-    address: { city: 'Carson City', country: 'USA', state: 'Nevada', street: '2188 Armbrester Drive' },
-    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    BuyPrice: '€ 1,200,000',
-    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    SellPrice: '€ 1,500,000',
-    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
-  },
-  {
-    id: 'USR-008',
-    picture: 'avatar-8.png',
-    pictureHandle: '',
-    address: { city: 'North Canton', country: 'USA', state: 'Ohio', street: '4894 Lakeland Park Drive' },
-    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    BuyPrice: '€ 1,200,000',
-    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    SellPrice: '€ 1,500,000',
-    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
-  },
-  {
-    id: 'USR-007',
-    picture: 'avatar-7.png',
-    pictureHandle: '',
-    address: { city: 'Salt Lake City', country: 'USA', state: 'Utah', street: '368 Lamberts Branch Road' },
-    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    BuyPrice: '€ 1,200,000',
-    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    SellPrice: '€ 1,500,000',
-    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
-  },
-  {
-    id: 'USR-006',
-    picture: 'avatar-6.png',
-    pictureHandle: '',
-    address: { city: 'Murray', country: 'USA', state: 'Utah', street: '3934 Wildrose Lane' },
-    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    BuyPrice: '€ 1,200,000',
-    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    SellPrice: '€ 1,500,000',
-    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
-  },
-  {
-    id: 'USR-005',
-    picture: 'avatar-5.png',
-    pictureHandle: '',
-    address: { city: 'Atlanta', country: 'USA', state: 'Georgia', street: '1865 Pleasant Hill Road' },
-    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    BuyPrice: '€ 1,200,000',
-    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    SellPrice: '€ 1,500,000',
-    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
-  },
-
-  {
-    id: 'USR-004',
-    picture: 'avatar-4.png',
-    pictureHandle: '',
-    address: { city: 'Berkeley', country: 'USA', state: 'California', street: '317 Angus Road' },
-    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    BuyPrice: '€ 1,200,000',
-    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    SellPrice: '€ 1,500,000',
-    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
-  },
-  {
-    id: 'USR-003',
-    picture: 'avatar-3.png',
-    pictureHandle: '',
-    address: { city: 'Cleveland', country: 'USA', state: 'Ohio', street: '2849 Fulton Street' },
-    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    BuyPrice: '€ 1,200,000',
-    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    SellPrice: '€ 1,500,000',
-    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
-  },
-  {
-    id: 'USR-002',
-    picture: 'avatar-2.png',
-    pictureHandle: '', 
-    address: { city: 'Los Angeles', country: 'USA', state: 'California', street: '1798 Hickory Ridge Drive' },
-    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    BuyPrice: '€ 1,200,000',
-    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    SellPrice: '€ 1,500,000',
-    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
-  },
-  {
-    id: 'USR-001',
-    picture: 'avatar-1.png',
-    pictureHandle: '',
-    address: { city: 'San Diego', country: 'USA', state: 'California', street: '75247' },
-    BuyTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    BuyPrice: '€ 1,200,000',
-    SellTime: Timestamp.fromDate(dayjs().subtract(2, 'hours').toDate()),
-    SellPrice: '€ 1,500,000',
-    externalIds: [{ channel: "zillow", account: '123456'}, {channel: "redin", account: '654321'}],
-  },
-] satisfies Property[];
-
 export default function Page(): React.JSX.Element {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const selectedId = React.useRef<string>('');
@@ -194,7 +80,7 @@ export default function Page(): React.JSX.Element {
               Import
             </Button>
             <Button color="inherit" startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />}
-            onClick = {() => ExportTable(customers, 'Properties', (element: Property) => element.id)}>
+            onClick = {() => ExportTable(properties, 'Properties', (element: Property) => element.id)}>
               Export
             </Button>
           </Stack>
@@ -211,7 +97,7 @@ export default function Page(): React.JSX.Element {
         placeHolder='Search Properties...'
       />
 
-      {customers.length != 0 && 
+      {properties.length != 0 && 
         <PropertiesTable
           count={properties.length}
           rows={properties}
