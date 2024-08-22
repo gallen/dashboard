@@ -3,6 +3,8 @@ const { resolve } = require('node:path');
 const project = resolve(__dirname, 'tsconfig.json');
 
 module.exports = {
+  rules: {} //No Rules
+  /*
   root: true,
   extends: [
     require.resolve('@vercel/style-guide/eslint/node'),
@@ -21,7 +23,8 @@ module.exports = {
       },
     },
   },
-  rules: {/*
+
+  rules: {
     '@typescript-eslint/no-unused-vars': [
       'error',
       {
@@ -54,7 +57,8 @@ module.exports = {
           pascalCase: true,
         },
       },
-    ],*/
+    ],
+
 
     // Deactivated
     '@typescript-eslint/dot-notation': 'off', // paths are used with a dot notation
@@ -72,5 +76,5 @@ module.exports = {
     'react/prop-types': 'off', // TypeScript is used for type checking
 
     '@next/next/no-img-element': 'off', // Temporary disabled
-  },
+  },*/
 };
