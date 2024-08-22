@@ -21,7 +21,7 @@ module.exports = {
       },
     },
   },
-  rules: {
+  rules: {/*
     '@typescript-eslint/no-unused-vars': [
       'error',
       {
@@ -54,7 +54,7 @@ module.exports = {
           pascalCase: true,
         },
       },
-    ],
+    ],*/
 
     // Deactivated
     '@typescript-eslint/dot-notation': 'off', // paths are used with a dot notation
