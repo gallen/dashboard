@@ -44,7 +44,8 @@ jobs:
         run: npx next build
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        run: pwd & ls
+        #uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
 
