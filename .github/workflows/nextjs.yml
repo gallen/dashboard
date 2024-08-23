@@ -41,10 +41,11 @@ jobs:
           static_site_generator: next
 
       - name: Build with Next.js
-        working-directory: ./
         run: |
           npx next build
           ls
+        env:
+          CI: false
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
