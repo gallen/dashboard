@@ -2,6 +2,7 @@
 const config = {
     basePath: "/dashboard",
     output: "export",
+    distDir: 'dist',
     productionBrowserSourceMaps: true,
 };
 
