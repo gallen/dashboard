@@ -41,8 +41,8 @@ jobs:
           static_site_generator: next
 
       - name: Build with Next.js
+        working-directory: ./
         run: |
-          mkdir out
           npx next build
           ls
 
