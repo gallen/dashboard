@@ -42,7 +42,7 @@ jobs:
 
       - name: Build with Next.js
         run: |
-          npx next build
+          npm run build
           ls
         env:
           CI: false
