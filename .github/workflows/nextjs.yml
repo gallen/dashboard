@@ -46,8 +46,8 @@ jobs:
       - name: Upload artifact
         run: pwd & ls
         #uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./out
+        #with:
+        #  path: ./out
 
   # Deployment job
   deploy:
